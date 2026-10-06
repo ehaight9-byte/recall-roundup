@@ -14,11 +14,26 @@ const niceDate = d => new Date(d + 'T12:00:00Z').toLocaleDateString('en-US', { y
 
 async function load() {
   if (process.env.RECALLS_FILE) return JSON.parse(fs.readFileSync(process.env.RECALLS_FILE, 'utf8'));
-  const start = new Date(Date.now() - site.days * 864e5).toISOString().slice(0, 10);
-  const url = `https://www.saferproducts.gov/RestWebServices/Recall?format=json&RecallDateStart=${start}`;
-  const res = await fetch(url, { headers: { 'User-Agent': 'RecallRoundup/1.0', Accept: 'application/json' } });
-  if (!res.ok) throw new Error(`CPSC API returned ${res.status}`);
-  return res.json();
+  // The CPSC service sometimes answers with an error record instead of data, so retry,
+  // then fall back to a shorter date range before giving up.
+  const usable = d => Array.isArray(d) && d.some(r => r && r.RecallNumber && r.RecallDate);
+  let last = 'no attempts';
+  for (const days of [site.days, 90, 30]) {
+    const start = new Date(Date.now() - days * 864e5).toISOString().slice(0, 10);
+    const url = `https://www.saferproducts.gov/RestWebServices/Recall?format=json&RecallDateStart=${start}`;
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        const res = await fetch(url, { headers: { 'User-Agent': 'RecallRoundup/1.0', Accept: 'application/json' }, signal: AbortSignal.timeout(60000) });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        if (usable(data)) { console.log(`Fetched ${data.length} records (${days} days, attempt ${attempt}).`); return data; }
+        last = `${days}d try ${attempt}: ${String((data && data[0] && data[0].Title) || 'no records').slice(0, 120)}`;
+      } catch (e) { last = `${days}d try ${attempt}: ${e.message}`; }
+      console.error(last);
+      await new Promise(r => setTimeout(r, 8000));
+    }
+  }
+  throw new Error(`CPSC data unavailable (${last})`);
 }
 
 const page = (path, title, desc, body) => `<!doctype html>
