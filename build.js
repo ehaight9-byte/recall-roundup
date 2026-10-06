@@ -141,16 +141,4 @@ ${Object.keys(cats).sort().map(c => `<li><a href="${catPath(c)}">${esc(c)}</a><s
     fs.writeFileSync(`${OUT}/robots.txt`, `User-agent: *\nAllow: /\nSitemap: ${site.url}/sitemap.xml\n`);
   }
   console.log(`Built ${recalls.length} recall pages in ${Object.keys(cats).length} categories.`);
-})().catch(e => {
-  const detail = [`BUILD FAILED: ${e.message}`, `cause: ${e.cause ? (e.cause.code || '') + ' ' + e.cause.message : 'none'}`, `node: ${process.version}`, `time: ${new Date().toISOString()}`].join('\n');
-  console.error(detail);
-  // TEMPORARY diagnostic: if no site has ever been published, publish the error so it can be read remotely.
-  if (process.env.DIAG_ON_FAIL === '1') {
-    fs.rmSync(OUT, { recursive: true, force: true });
-    fs.mkdirSync(OUT, { recursive: true });
-    fs.writeFileSync(`${OUT}/debug.txt`, detail + '\n');
-    fs.writeFileSync(`${OUT}/index.html`, '<!doctype html><title>Recall Roundup</title><p>Setting up. Check back soon.</p>');
-    process.exit(0);
-  }
-  process.exit(1);
-});
+})().catch(e => { console.error('BUILD FAILED:', e.message); process.exit(1); });
