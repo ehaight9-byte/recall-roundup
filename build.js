@@ -67,7 +67,7 @@ const write = (path, html) => {
       images: (r.Images || []).map(i => ({ url: safeUrl(i && i.URL), caption: i && i.Caption && !/^https?:/.test(i.Caption) ? i.Caption : '' })).filter(i => i.url).slice(0, 4),
     };
   }).sort((a, b) => b.date.localeCompare(a.date) || b.number.localeCompare(a.number));
-  if (recalls.length === 0) throw new Error('No usable recall records; keeping the previous site.');
+  if (recalls.length === 0) throw new Error(`No usable recall records; keeping the previous site. got ${raw.length} raw; first keys: ${Object.keys(raw[0] || {}).join(',')}; sample: ${JSON.stringify(raw[0]).slice(0, 600)}`);
   for (const r of recalls) r.path = `/recall/${slugify(r.number)}-${slugify(r.product)}`;
 
   const cats = {};
