@@ -130,7 +130,8 @@ ${Object.keys(cats).sort().map(c => `<li><a href="${catPath(c)}">${esc(c)}</a><s
   const detail = [`BUILD FAILED: ${e.message}`, `cause: ${e.cause ? (e.cause.code || '') + ' ' + e.cause.message : 'none'}`, `node: ${process.version}`, `time: ${new Date().toISOString()}`].join('\n');
   console.error(detail);
   // TEMPORARY diagnostic: if no site has ever been published, publish the error so it can be read remotely.
-  if (process.env.DIAG_ON_FAIL === '1' && !fs.existsSync(`${OUT}/index.html`)) {
+  if (process.env.DIAG_ON_FAIL === '1') {
+    fs.rmSync(OUT, { recursive: true, force: true });
     fs.mkdirSync(OUT, { recursive: true });
     fs.writeFileSync(`${OUT}/debug.txt`, detail + '\n');
     fs.writeFileSync(`${OUT}/index.html`, '<!doctype html><title>Recall Roundup</title><p>Setting up. Check back soon.</p>');
