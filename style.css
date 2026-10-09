@@ -26,3 +26,7 @@ main h2 { margin-top:36px; }
 .box { background:var(--card); border:1px solid var(--line); border-left:4px solid var(--accent); border-radius:8px; padding:4px 16px; margin:24px 0; }
 main img { max-width:100%; height:auto; border:1px solid var(--line); border-radius:8px; margin:8px 0; }
 main p, main li { overflow-wrap:anywhere; }
+
+.promo { background:var(--card); border:1px solid var(--line); border-left:4px solid var(--accent); border-radius:8px; padding:12px 16px; margin:28px 0; font:15px/1.5 system-ui, sans-serif; }
+.promo a { font-weight:700; }
+.tip { font:14px/1.5 system-ui, sans-serif; color:var(--mute); margin:12px 0 24px; }

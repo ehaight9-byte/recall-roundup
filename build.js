@@ -44,13 +44,14 @@ const page = (path, title, desc, body) => `<!doctype html>
 <title>${esc(title)}</title>
 <meta name="description" content="${esc(desc)}">
 ${site.verification ? `<meta name="google-site-verification" content="${esc(site.verification)}" />\n` : ''}${site.url ? `<link rel="canonical" href="${site.url}${path}">\n` : ''}<link rel="stylesheet" href="/style.css">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8267973935350100" crossorigin="anonymous"></script>
 </head>
 <body>
 <header><a href="/">${esc(site.name)}</a></header>
 <main>
 ${body}
 </main>
-<footer>Recall information comes from the U.S. Consumer Product Safety Commission (CPSC). This site is not affiliated with the CPSC. Always confirm details on the official notice.</footer>
+<footer>Recall information comes from the U.S. Consumer Product Safety Commission (CPSC). This site is not affiliated with the CPSC. Always confirm details on the official notice. Some links are affiliate links: if you buy through them, we may earn a commission at no extra cost to you.</footer>
 </body>
 </html>
 `;
@@ -93,6 +94,7 @@ const write = (path, html) => {
   fs.rmSync(OUT, { recursive: true, force: true });
   fs.mkdirSync(OUT, { recursive: true });
   fs.copyFileSync('style.css', `${OUT}/style.css`);
+  fs.writeFileSync(`${OUT}/ads.txt`, 'google.com, pub-8267973935350100, DIRECT, f08c47fec0942fa0\n');
 
   for (const r of recalls) {
     write(r.path, page(r.path, `${r.product} Recall (${niceDate(r.date)}): What to Do`, (r.hazards[0] || r.title).slice(0, 155), `<p class="meta">Recalled ${niceDate(r.date)} · CPSC recall #${esc(r.number)} · <a href="${catPath(r.category)}">${esc(r.category)}</a></p>
@@ -112,7 +114,8 @@ ${r.description ? paras([r.description]) : ''}
 ${r.units ? `<p><strong>Units:</strong> ${esc(r.units)}</p>` : ''}
 ${r.images.map(i => `<img src="${esc(i.url)}" alt="${esc(i.caption || r.product)}" loading="lazy">`).join('\n')}
 ${r.sold.length ? `<h2>Where it was sold</h2>\n${paras(r.sold)}` : ''}
-${r.url ? `<p><a href="${esc(r.url)}" rel="nofollow">Read the official CPSC notice</a></p>` : ''}`));
+${r.url ? `<p><a href="${esc(r.url)}" rel="nofollow">Read the official CPSC notice</a></p>` : ''}
+<p class="tip">Want to hear about new recalls without checking back? A free browser tool like <a href="https://harpa.ai?fpr=flyjck" rel="sponsored nofollow noopener" target="_blank">HARPA AI</a> can watch a page and alert you when it changes.</p>`));
   }
 
   for (const [c, list] of Object.entries(cats)) {
